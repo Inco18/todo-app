@@ -14,25 +14,28 @@ export type Database = {
           createdAt: string
           desc: string | null
           id: number
-          priority: string
-          status: string
+          priority: Database["public"]["Enums"]["priority"]
+          status: Database["public"]["Enums"]["status"]
           title: string
+          userId: string
         }
         Insert: {
           createdAt?: string
           desc?: string | null
           id?: number
-          priority?: string
-          status?: string
+          priority?: Database["public"]["Enums"]["priority"]
+          status?: Database["public"]["Enums"]["status"]
           title?: string
+          userId: string
         }
         Update: {
           createdAt?: string
           desc?: string | null
           id?: number
-          priority?: string
-          status?: string
+          priority?: Database["public"]["Enums"]["priority"]
+          status?: Database["public"]["Enums"]["status"]
           title?: string
+          userId?: string
         }
         Relationships: []
       }
@@ -44,7 +47,8 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      priority: "low" | "medium" | "high"
+      status: "new" | "in progress" | "completed"
     }
     CompositeTypes: {
       [_ in never]: never

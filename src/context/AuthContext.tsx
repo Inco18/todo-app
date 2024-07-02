@@ -2,6 +2,7 @@ import React from "react";
 import { AuthError, Session, User, WeakPassword } from "@supabase/supabase-js";
 import { createContext, useState, useEffect, useContext } from "react";
 import { supabase } from "../supabaseClient";
+import { Loader2 } from "lucide-react";
 
 type authContextType = {
   user: null | User;
@@ -59,14 +60,11 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       email: email,
       password: password,
     });
-    console.log("data: ", data);
-    console.log("error: ", error);
     return { data, error };
   };
 
   const signOut = async () => {
     const { error } = await supabase.auth.signOut();
-    console.log("error: ", error);
     if (!error) {
       setUser(null);
       setSession(null);
@@ -76,7 +74,13 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   return (
     <AuthContext.Provider value={{ user, signIn, signOut }}>
-      {!loading ? children : <div>Loading...</div>}
+      {!loading ? (
+        children
+      ) : (
+        <div className="h-full flex items-center justify-center">
+          <Loader2 size={100} className="animate-spin" />
+        </div>
+      )}
     </AuthContext.Provider>
   );
 };

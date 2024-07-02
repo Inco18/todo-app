@@ -1,8 +1,16 @@
-import React from "react";
-import { useAuth } from "../context/AuthContext";
+import TodosHeader from "../components/todos/TodosHeader";
+import TodosList from "../components/todos/TodosList";
+import TodosProvider from "../context/TodosContext";
 
 const Todos = () => {
-  return <div>Todos</div>;
+  return (
+    <>
+      <TodosHeader />
+      <TodosProvider>
+        <TodosList />
+      </TodosProvider>
+    </>
+  );
 };
 
 export default Todos;

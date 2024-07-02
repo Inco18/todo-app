@@ -14,6 +14,7 @@ import { Input } from "../components/ui/input";
 import { toast } from "react-toastify";
 import { Link, Navigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { useState } from "react";
 
 const loginFormSchema = z.object({
   email: z.string().email(),
@@ -32,11 +33,13 @@ const Login = () => {
       password: "",
     },
   });
+  const [isLoading, setIsLoading] = useState(false);
 
   async function onSubmit(values: z.infer<typeof loginFormSchema>) {
     if (!signIn) return;
-    const { data, error } = await signIn(values.email, values.password);
-    console.log(data, error);
+    setIsLoading(true);
+    const { error } = await signIn(values.email, values.password);
+    setIsLoading(false);
     if (error) {
       toast.error("Could not sign in: " + error.message);
     }
@@ -77,7 +80,9 @@ const Login = () => {
               )}
             />
             <div className="flex justify-between">
-              <Button type="submit">Sign in</Button>
+              <Button type="submit" disabled={isLoading}>
+                {isLoading ? "Signing in..." : "Sign in"}
+              </Button>
               <Link
                 to={"/signup"}
                 className={buttonVariants({ variant: "outline" })}>

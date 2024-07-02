@@ -15,6 +15,7 @@ import { supabase } from "../supabaseClient";
 import { toast } from "react-toastify";
 import { Link, Navigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { useState } from "react";
 
 const signupFormSchema = z.object({
   email: z.string().email(),
@@ -33,12 +34,15 @@ const Signup = () => {
       password: "",
     },
   });
+  const [isLoading, setIsLoading] = useState(false);
 
   async function onSubmit(values: z.infer<typeof signupFormSchema>) {
+    setIsLoading(true);
     const { error } = await supabase.auth.signUp({
       email: values.email,
       password: values.password,
     });
+    setIsLoading(false);
     if (error) {
       toast.error("Could not sign up: " + error.message);
     }
@@ -79,7 +83,9 @@ const Signup = () => {
               )}
             />
             <div className="flex justify-between">
-              <Button type="submit">Sign up</Button>
+              <Button type="submit" disabled={isLoading}>
+                {isLoading ? "Signing up..." : "Sign up"}
+              </Button>
               <Link
                 to={"/login"}
                 className={buttonVariants({ variant: "outline" })}>
