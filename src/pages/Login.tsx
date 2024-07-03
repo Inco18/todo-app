@@ -15,19 +15,15 @@ import { toast } from "react-toastify";
 import { Link, Navigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useState } from "react";
-
-const loginFormSchema = z.object({
-  email: z.string().email(),
-  password: z.string().min(8, "Password must be at least 8 letters long"),
-});
+import { accountFormSchema } from "../schemas/accountFormSchema";
 
 const Login = () => {
   const { user, signIn } = useAuth();
   if (user) {
     return <Navigate to="/" replace />;
   }
-  const form = useForm<z.infer<typeof loginFormSchema>>({
-    resolver: zodResolver(loginFormSchema),
+  const form = useForm<z.infer<typeof accountFormSchema>>({
+    resolver: zodResolver(accountFormSchema),
     defaultValues: {
       email: "",
       password: "",
@@ -35,20 +31,20 @@ const Login = () => {
   });
   const [isLoading, setIsLoading] = useState(false);
 
-  async function onSubmit(values: z.infer<typeof loginFormSchema>) {
+  async function onSubmit(values: z.infer<typeof accountFormSchema>) {
     if (!signIn) return;
     setIsLoading(true);
     const { error } = await signIn(values.email, values.password);
     setIsLoading(false);
     if (error) {
-      toast.error("Could not sign in: " + error.message);
+      toast.error("Could not login: " + error.message);
     }
   }
 
   return (
-    <main className="h-full flex items-center justify-center">
-      <div className="bg-secondary p-6 rounded-md flex flex-col">
-        <h1 className="m-auto mb-5 text-3xl font-semibold">Sign in</h1>
+    <main className="bg-secondary h-full flex items-center justify-center">
+      <div className="bg-background p-6 rounded-md flex flex-col">
+        <h1 className="m-auto mb-5 text-3xl font-semibold">Login</h1>
         <Form {...form}>
           <form
             onSubmit={form.handleSubmit(onSubmit)}
@@ -79,9 +75,9 @@ const Login = () => {
                 </FormItem>
               )}
             />
-            <div className="flex justify-between">
+            <div className="flex flex-col gap-5">
               <Button type="submit" disabled={isLoading}>
-                {isLoading ? "Signing in..." : "Sign in"}
+                {isLoading ? "Logging in..." : "Login"}
               </Button>
               <Link
                 to={"/signup"}

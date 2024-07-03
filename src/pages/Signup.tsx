@@ -16,19 +16,15 @@ import { toast } from "react-toastify";
 import { Link, Navigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useState } from "react";
-
-const signupFormSchema = z.object({
-  email: z.string().email(),
-  password: z.string().min(8, "Password must be at least 8 letters long"),
-});
+import { accountFormSchema } from "../schemas/accountFormSchema";
 
 const Signup = () => {
-  const { user, signIn } = useAuth();
+  const { user } = useAuth();
   if (user) {
     return <Navigate to="/" replace />;
   }
-  const form = useForm<z.infer<typeof signupFormSchema>>({
-    resolver: zodResolver(signupFormSchema),
+  const form = useForm<z.infer<typeof accountFormSchema>>({
+    resolver: zodResolver(accountFormSchema),
     defaultValues: {
       email: "",
       password: "",
@@ -36,7 +32,7 @@ const Signup = () => {
   });
   const [isLoading, setIsLoading] = useState(false);
 
-  async function onSubmit(values: z.infer<typeof signupFormSchema>) {
+  async function onSubmit(values: z.infer<typeof accountFormSchema>) {
     setIsLoading(true);
     const { error } = await supabase.auth.signUp({
       email: values.email,
@@ -49,8 +45,8 @@ const Signup = () => {
   }
 
   return (
-    <main className="h-full flex items-center justify-center">
-      <div className="bg-secondary p-6 rounded-md flex flex-col">
+    <main className="h-full flex items-center justify-center bg-secondary">
+      <div className="bg-background p-6 rounded-md flex flex-col">
         <h1 className="m-auto mb-5 text-3xl font-semibold">Sign up</h1>
         <Form {...form}>
           <form
@@ -82,14 +78,14 @@ const Signup = () => {
                 </FormItem>
               )}
             />
-            <div className="flex justify-between">
+            <div className="flex flex-col gap-5">
               <Button type="submit" disabled={isLoading}>
                 {isLoading ? "Signing up..." : "Sign up"}
               </Button>
               <Link
                 to={"/login"}
                 className={buttonVariants({ variant: "outline" })}>
-                Already have an account? Sign in.
+                Already have an account? Login.
               </Link>
             </div>
           </form>

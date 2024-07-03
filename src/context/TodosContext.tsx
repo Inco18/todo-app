@@ -4,18 +4,18 @@ import { supabase } from "../supabaseClient";
 import { toast } from "react-toastify";
 import { Enums } from "../types/supabase.types";
 
-type todosType = {
+export type todoType = {
   id: number;
   createdAt: string;
   title: string;
   desc: string | null;
   status: Enums<"status">;
   priority: Enums<"priority">;
-}[];
+};
 
 type todosContextType = {
-  todos: todosType;
-  setTodos: React.Dispatch<React.SetStateAction<todosType>>;
+  todos: todoType[];
+  setTodos: React.Dispatch<React.SetStateAction<todoType[]>>;
   isLoading: boolean;
 };
 
@@ -31,7 +31,7 @@ export const useTodos = () => {
 
 const TodosProvider = ({ children }: { children: React.ReactNode }) => {
   const { user } = useAuth();
-  const [todos, setTodos] = useState<todosType>([]);
+  const [todos, setTodos] = useState<todoType[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {

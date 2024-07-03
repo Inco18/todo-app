@@ -16,9 +16,9 @@ import {
 } from "../../components/ui/form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Button } from "../ui/button";
-import { Loader2, Plus } from "lucide-react";
+import { Loader2, Pencil } from "lucide-react";
 import { z } from "zod";
 import { Input } from "../ui/input";
 import { Textarea } from "../ui/textarea";
@@ -35,43 +35,66 @@ import { supabase } from "../../supabaseClient";
 import { useAuth } from "../../context/AuthContext";
 import { toast } from "react-toastify";
 import { todoFormSchema } from "../../schemas/todoFormSchema";
+import { Enums } from "../../types/supabase.types";
 
-const AddTodoDialog = () => {
+type Props = {
+  todo: {
+    id: number;
+    title: string;
+    desc: string | null;
+    status: Enums<"status">;
+    priority: Enums<"priority">;
+  };
+};
+
+const EditTodoDialog = ({ todo }: Props) => {
   const [isLoading, setIsLoading] = useState(false);
   const [open, setOpen] = useState(false);
   const { setTodos } = useTodos();
   const { user } = useAuth();
+  const defaultValues: z.infer<typeof todoFormSchema> = useMemo(() => {
+    return {
+      title: todo.title,
+      status: todo.status,
+      priority: todo.priority,
+      desc: todo.desc !== null ? todo.desc : undefined,
+    };
+  }, [todo]);
   const form = useForm<z.infer<typeof todoFormSchema>>({
     resolver: zodResolver(todoFormSchema),
-    defaultValues: {
-      title: "",
-      status: "new",
-      priority: "low",
-      desc: undefined,
-    },
+    defaultValues: defaultValues,
   });
+
+  useEffect(() => {
+    form.reset(defaultValues);
+  }, [todo, defaultValues, form]);
+
   async function onSubmit(values: z.infer<typeof todoFormSchema>) {
     if (!user?.id) {
-      toast.error("Could not add todo: No user");
+      toast.error("Could not edit todo: No user");
       return;
     }
     setIsLoading(true);
     const { data, error } = await supabase
       .from("todos")
-      .insert({
-        userId: user.id,
+      .update({
         desc: values.desc || null,
         priority: values.priority,
         status: values.status,
         title: values.title,
       })
-      .select();
+      .eq("id", todo.id)
+      .select()
+      .single();
     setIsLoading(false);
     if (error) {
-      toast.error("Could not add todo: " + error.message);
+      toast.error("Could not edit todo: " + error.message);
     } else {
       setTodos((prev) => {
-        return [...data, ...prev];
+        return prev.map((prevTodo) => {
+          if (prevTodo.id !== data.id) return prevTodo;
+          else return data;
+        });
       });
       setOpen(false);
     }
@@ -84,19 +107,18 @@ const AddTodoDialog = () => {
         setOpen(bool);
       }}>
       <DialogTrigger asChild>
-        <Button>
-          <Plus size={20} className="mr-1" />
-          Add new todo
+        <Button variant={"outline"} size={"icon"} className="flex-shrink-0">
+          <Pencil size={14} />
         </Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Add new todo</DialogTitle>
+          <DialogTitle>Edit todo</DialogTitle>
         </DialogHeader>
         <Form {...form}>
           <form
             onSubmit={form.handleSubmit(onSubmit)}
-            className="space-y-4 min-w-[25rem]">
+            className="space-y-4 md:min-w-[25rem]">
             <FormField
               control={form.control}
               name="title"
@@ -212,7 +234,7 @@ const AddTodoDialog = () => {
             <div className="flex gap-2">
               <Button type="submit" disabled={isLoading}>
                 {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                {isLoading ? "Adding..." : "Add"}
+                {isLoading ? "Editing..." : "Edit"}
               </Button>
               <DialogClose asChild>
                 <Button variant={"outline"}>Cancel</Button>
@@ -225,4 +247,4 @@ const AddTodoDialog = () => {
   );
 };
 
-export default AddTodoDialog;
+export default EditTodoDialog;
