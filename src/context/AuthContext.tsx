@@ -55,7 +55,6 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   }, []);
 
   const signIn = async (email: string, password: string) => {
-    console.log(1);
     const { data, error } = await supabase.auth.signInWithPassword({
       email: email,
       password: password,
